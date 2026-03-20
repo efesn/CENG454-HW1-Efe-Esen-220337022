@@ -11,6 +11,8 @@ public class FlightController : MonoBehaviour
     [SerializeField] private float rollSpeed   = 45f;  // degrees/second 
     [SerializeField] private float thrustSpeed = 5f;   // units/second 
     [SerializeField] private Transform thrustReference;
+    [SerializeField] private AudioSource engineAudioSource;
+    [SerializeField] private AudioClip engineClip;
  
     // TODO (Task 3-A): Declare a private Rigidbody field named 'rb' 
 
@@ -36,6 +38,27 @@ public class FlightController : MonoBehaviour
             autoRef.transform.localPosition = Vector3.zero;
             autoRef.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
             thrustReference = autoRef.transform;
+        }
+
+        if (engineAudioSource == null)
+        {
+            engineAudioSource = GetComponent<AudioSource>();
+            if (engineAudioSource == null)
+            {
+                engineAudioSource = gameObject.AddComponent<AudioSource>();
+            }
+        }
+
+        if (engineClip == null)
+        {
+            engineClip = Resources.Load<AudioClip>("Audio/airplane_engine");
+        }
+
+        engineAudioSource.playOnAwake = false;
+        engineAudioSource.loop = true;
+        if (engineClip != null)
+        {
+            engineAudioSource.clip = engineClip;
         }
 
         rb.freezeRotation = true;  // Why is freezeRotation needed? Answer in your PDF. 
@@ -80,6 +103,18 @@ public class FlightController : MonoBehaviour
         {
         Vector3 worldForward = thrustReference.TransformDirection(Vector3.forward);
         transform.Translate(worldForward * thrustSpeed * Time.deltaTime, Space.World);
+
+        if (engineAudioSource != null && engineAudioSource.clip != null && !engineAudioSource.isPlaying)
+        {
+            engineAudioSource.Play();
+        }
+        }
+        else
+        {
+            if (engineAudioSource != null && engineAudioSource.isPlaying)
+            {
+                engineAudioSource.Stop();
+            }
         }
     } 
 } 
