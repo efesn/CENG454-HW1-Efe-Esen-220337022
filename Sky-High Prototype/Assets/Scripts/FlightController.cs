@@ -10,12 +10,34 @@ public class FlightController : MonoBehaviour
     [SerializeField] private float yawSpeed    = 45f;  // degrees/second 
     [SerializeField] private float rollSpeed   = 45f;  // degrees/second 
     [SerializeField] private float thrustSpeed = 5f;   // units/second 
+    [SerializeField] private Transform thrustReference;
  
+    // TODO (Task 3-A): Declare a private Rigidbody field named 'rb' 
+
     private Rigidbody rb;
  
     void Start() 
     { 
+        // TODO (Task 3-B): Cache GetComponent<Rigidbody>() into 'rb'. 
+        //                  Then set rb.freezeRotation = true. 
+        //                  Why is freezeRotation needed? Answer in your PDF.
         rb = GetComponent<Rigidbody>();
+        if (rb == null)
+        {
+            Debug.LogError("FlightController requires a Rigidbody on the same GameObject.");
+            enabled = false;
+            return;
+        }
+
+        if (thrustReference == null)
+        {
+            var autoRef = new GameObject("ThrustForwardRefRuntime");
+            autoRef.transform.SetParent(transform, false);
+            autoRef.transform.localPosition = Vector3.zero;
+            autoRef.transform.localRotation = Quaternion.Euler(90f, 0f, 0f);
+            thrustReference = autoRef.transform;
+        }
+
         rb.freezeRotation = true;  // Why is freezeRotation needed? Answer in your PDF. 
     } 
  
@@ -27,6 +49,7 @@ public class FlightController : MonoBehaviour
  
     private void HandleRotation() 
     { 
+         // TODO (Task 3-C): 
         float pitchInput = Input.GetAxis("Vertical");
         float yawInput = Input.GetAxis("Horizontal");
 
@@ -52,9 +75,11 @@ public class FlightController : MonoBehaviour
  
     private void HandleThrust() 
     { 
+         // TODO (Task 3-D): 
         if (Input.GetKey(KeyCode.Space))
         {
-        transform.Translate(Vector3.forward * thrustSpeed * Time.deltaTime, Space.Self);
+        Vector3 worldForward = thrustReference.TransformDirection(Vector3.forward);
+        transform.Translate(worldForward * thrustSpeed * Time.deltaTime, Space.World);
         }
     } 
 } 
